@@ -13,5 +13,8 @@ package com.tmind.orpheus.util;
  */
 public class Constant {
     public static final String VOICE_PATH = "d:/music/silk/";
+    public static final String STANDARD_VOICE_PATH = "d:/music/std/";
     public static final String FFMPEG_PATH = "D:/ffmpeg/bin/ffmpeg.exe";
+    public static final int MAX_VOICE_COMPARE = 5;
 }
+

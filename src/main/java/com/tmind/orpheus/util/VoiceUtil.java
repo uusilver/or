@@ -6,6 +6,8 @@ package com.tmind.orpheus.util;
  */
 
 
+import com.musicg.fingerprint.FingerprintSimilarity;
+import com.musicg.wave.Wave;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
 import java.io.*;
@@ -19,7 +21,7 @@ import java.util.logging.Logger;
  */
 public class VoiceUtil {
 
-    public static void transferVoiceToWebm(InputStream inputStream, File saveFile) {
+    public static String transferVoiceToWebm(InputStream inputStream, File saveFile) {
         try {
             String encoding = "utf-8";
             boolean base64Flag = false;
@@ -41,8 +43,6 @@ public class VoiceUtil {
             if (base64Flag) {  //如果使用了base64加密
                 olddata = olddata.replace("data:audio/webm;base64,", "");
             }
-            System.out.println(olddata);
-
             try {
                 byte[] bt = Base64.decode(olddata);
                 FileOutputStream in = new FileOutputStream(saveFile);
@@ -63,15 +63,16 @@ public class VoiceUtil {
             }
             String fullPath = saveFile.getName();
             String prefix = fullPath.substring(0, fullPath.lastIndexOf("."));
-            executeTransWebmToWav(prefix);
+            return executeTransWebmToWav(prefix);
         }
         catch (Exception e) {
             System.out.println("读取文件内容出错");
             e.printStackTrace();
         }
+        return null;
     }
 
-    private static void executeTransWebmToWav(String prefix) {
+    private static String executeTransWebmToWav(String prefix) {
         Runtime run = Runtime.getRuntime();
         Process process = null;
         List<String> commands = new java.util.ArrayList<String>();
@@ -93,10 +94,22 @@ public class VoiceUtil {
             int readbytes = -1;
 
             while ((readbytes = error.read(b)) != -1) {
-                System.out.println("FFMPEG转换失败");
+//                System.out.println("FFMPEG转换失败");
             }
             while ((readbytes = is.read(b)) != -1) {
-                System.out.println("FFMPEG转换成功");
+//                System.out.println("FFMPEG转换成功");
+            }
+            File voiceFile = new File(Constant.VOICE_PATH+prefix+".wav");
+            if(voiceFile.exists()){
+                String track1 = Constant.STANDARD_VOICE_PATH+"1.wav", track2 = voiceFile.getAbsolutePath();
+                Wave wave1 = new Wave(track1), wave2 = new Wave(track2);
+
+                FingerprintSimilarity similarity;
+
+                // compare fingerprints:
+                similarity = wave1.getFingerprintSimilarity(wave2);
+                float result = similarity.getSimilarity();
+                return String.valueOf(result*1000);
             }
         }
         catch (IOException e2) {
@@ -112,5 +125,6 @@ public class VoiceUtil {
             }
 
         }
+        return null;
     }
 }
